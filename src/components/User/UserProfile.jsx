@@ -1,19 +1,55 @@
-import { useEffect } from "react";
-import { alertError } from "../../lib/alert";
-import { useEffectOnce } from "react-use";
+import { useState } from "react";
+import { alertError, alertSuccess } from "../../lib/alert";
+import { useEffectOnce, useLocalStorage } from "react-use";
+import { userDetail } from "../../lib/api/UserApi";
 
 export default function UserProfile() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [token, _] = useLocalStorage("token", "");
 
   async function fetchUserDetail() {
     const response = await userDetail(token);
     const responseBody = await response.json();
     console.log(responseBody);
+    console.log(token);
 
     if (response.status === 200) {
       setName(responseBody.data.name);
+    } else {
+      await alertError(responseBody.errors);
+    }
+  }
+
+  async function handleSubmitProfile(e) {
+    e.preventDefault();
+
+    const response = await userUpdateProfile(token, { name });
+    const responseBody = await response.json();
+    console.log(responseBody);
+
+    if (response.status === 200) {
+      await alertSuccess("Profile updated succesfully");
+    } else {
+      await alertError(responseBody.errors);
+    }
+  }
+
+  async function handleSubmitPassword(e) {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      await alertSuccess("Password don't match");
+      return;
+    }
+
+    const response = await userUpdateProfile(token, { name });
+    const responseBody = await response.json();
+    console.log(responseBody);
+
+    if (response.status === 200) {
+      await alertSuccess("Password updated succesfully");
     } else {
       await alertError(responseBody.errors);
     }
@@ -44,7 +80,7 @@ export default function UserProfile() {
                   Edit Profile
                 </h2>
               </div>
-              <form>
+              <form onSubmit={handleSubmitProfile}>
                 <div className="mb-5">
                   <label
                     htmlFor="name"
@@ -90,7 +126,7 @@ export default function UserProfile() {
                   Change Password
                 </h2>
               </div>
-              <form>
+              <form onSubmit={handleSubmitPassword}>
                 <div className="mb-5">
                   <label
                     htmlFor="new_password"
