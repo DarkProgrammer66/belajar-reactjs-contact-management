@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { alertError, alertSuccess } from "../../lib/alert";
 import { useEffectOnce, useLocalStorage } from "react-use";
-import { userDetail } from "../../lib/api/UserApi";
+import {
+  userDetail,
+  userUpdateName,
+  userUpdatePassword,
+} from "../../lib/api/UserApi";
 
 export default function UserProfile() {
   const [name, setName] = useState("");
@@ -25,7 +29,7 @@ export default function UserProfile() {
   async function handleSubmitProfile(e) {
     e.preventDefault();
 
-    const response = await userUpdateProfile(token, { name });
+    const response = await userUpdateName(token, { name });
     const responseBody = await response.json();
     console.log(responseBody);
 
@@ -40,15 +44,17 @@ export default function UserProfile() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      await alertSuccess("Password don't match");
+      await alertError("Password don't match");
       return;
     }
 
-    const response = await userUpdateProfile(token, { name });
+    const response = await userUpdatePassword(token, { password });
     const responseBody = await response.json();
     console.log(responseBody);
 
     if (response.status === 200) {
+      setPassword("");
+      setConfirmPassword("");
       await alertSuccess("Password updated succesfully");
     } else {
       await alertError(responseBody.errors);
