@@ -12,6 +12,7 @@ import ContactList from "./components/contact/ContactList.jsx";
 import ContactEdit from "./components/contact/ContactEdit.jsx";
 import ContactDetail from "./components/contact/ContactDetail.jsx";
 import AddressCreate from "./components/Address/AddressCreate.jsx";
+import AddressEdit from "./components/Address/AddressEdit.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -35,6 +36,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="edit" element={<ContactEdit />} />
               <Route path="addresses">
                 <Route path="create" element={<AddressCreate />} />
+                <Route path=":addressId/edit" element={<AddressEdit />} />
               </Route>
             </Route>
           </Route>

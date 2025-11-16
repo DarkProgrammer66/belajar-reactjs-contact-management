@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { contactDetail } from "../../lib/api/ContactApi";
 import { addressList } from "../../lib/api/AddressApi";
-import { alertError } from "../../lib/alert";
+import { alertConfirm, alertError, alertSuccess } from "../../lib/alert";
 import { useEffectOnce } from "react-use";
 import { useLocalStorage } from "react-use";
 
@@ -31,6 +31,25 @@ export default function ContactDetail() {
 
     if (response.status === 200) {
       setAddresses(responseBody.data);
+    } else {
+      await alertError(responseBody.errors);
+    }
+  }
+
+  async function handleDeleteAddress(addressId) {
+    if (
+      !(await alertConfirm("Are you sure you want to delete this address?"))
+    ) {
+      return;
+    }
+
+    const response = await addressList(token, id, addressId);
+    const responseBody = await response.json();
+    console.log(responseBody);
+
+    if (response.status === 200) {
+      await alertSuccess("Address deleted successfully");
+      await fetchAddresses();
     } else {
       await alertError(responseBody.errors);
     }
@@ -171,13 +190,16 @@ export default function ContactDetail() {
                       </p>
                     </div>
                     <div className="flex justify-end space-x-3">
-                      <a
-                        href="edit_address.html"
+                      <Link
+                        to={`/dashboard/contacts/${id}/addresses/${address.id}/edit`}
                         className="px-4 py-2 bg-gradient text-white rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all duration-200 font-medium shadow-md flex items-center"
                       >
                         <i className="fas fa-edit mr-2" /> Edit
-                      </a>
-                      <button className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all duration-200 font-medium shadow-md flex items-center">
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteAddress(address.id)}
+                        className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all duration-200 font-medium shadow-md flex items-center"
+                      >
                         <i className="fas fa-trash-alt mr-2" /> Delete
                       </button>
                     </div>
